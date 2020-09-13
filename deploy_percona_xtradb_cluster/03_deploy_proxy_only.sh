@@ -10,9 +10,9 @@ export ANSIBLE_HOST_KEY_CHECKING=False
 priv_key="/root/repos/ansible_keys/ansible"
 ansible_user="gcp-user"
 ### vars databases ###
-dbprimary01_ip=$(cat ${OUTPUT_DIR}/db_ips.txt | grep dbprimary01 | awk -F ":" {'print $2'})
-dbreplica01_ip=$(cat ${OUTPUT_DIR}/db_ips.txt | grep dbreplica01 | awk -F ":" {'print $2'})
-dbreplica02_ip=$(cat ${OUTPUT_DIR}/db_ips.txt | grep dbreplica02 | awk -F ":" {'print $2'})
+dbcluster01_ip=$(cat ${OUTPUT_DIR}/db_ips.txt | grep dbcluster01 | awk -F ":" {'print $2'})
+dbcluster02_ip=$(cat ${OUTPUT_DIR}/db_ips.txt | grep dbcluster02 | awk -F ":" {'print $2'})
+dbcluster03_ip=$(cat ${OUTPUT_DIR}/db_ips.txt | grep dbcluster03 | awk -F ":" {'print $2'})
 
 ### deploy proxysql ###
 echo '// A single Compute Engine instance
@@ -99,10 +99,10 @@ echo "proxysql02 ansible_ssh_host=$proxysql02_ip_pub" >> ${OUTPUT_DIR}/proxy_hos
 sleep 90
 
 # deploy ProxySQL to the new VM instances using Ansible
-ansible -i ${OUTPUT_DIR}/proxy_hosts.txt -m shell -a "curl -sS https://raw.githubusercontent.com/emersongaudencio/general-deployment-scripts/master/automation/install_ansible_proxysql2_replica.sh | sudo bash" proxyservers -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/install_proxysql_proxyservers.txt
+ansible -i ${OUTPUT_DIR}/proxy_hosts.txt -m shell -a "curl -sS https://raw.githubusercontent.com/emersongaudencio/general-deployment-scripts/master/automation/install_ansible_proxysql2_galera.sh | sudo bash" proxyservers -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/install_proxysql_proxyservers.txt
 
 # insert dns entries for ProxySQL on /etc/hosts
-ansible -i ${OUTPUT_DIR}/proxy_hosts.txt -m shell -a 'echo "# dbservers" >> /etc/hosts && echo "{{ dbprimary01_ip }} primary.replication.local" >> /etc/hosts && echo "{{ dbreplica01_ip }} replica1.replication.local" >> /etc/hosts && echo "{{ dbreplica02_ip }} replica2.replication.local" >> /etc/hosts; cat /etc/hosts' proxysql01 -u $ansible_user --private-key=$priv_key --become -e "{dbprimary01_ip: '$dbprimary01_ip', dbreplica01_ip: '$dbreplica01_ip', dbreplica02_ip: '$dbreplica02_ip'}" -o > ${OUTPUT_DIR}/setup_proxy_dbservers_px1.txt
-ansible -i ${OUTPUT_DIR}/proxy_hosts.txt -m shell -a 'echo "# dbservers" >> /etc/hosts && echo "{{ dbprimary01_ip }} primary.replication.local" >> /etc/hosts && echo "{{ dbreplica01_ip }} replica1.replication.local" >> /etc/hosts && echo "{{ dbreplica02_ip }} replica2.replication.local" >> /etc/hosts; cat /etc/hosts' proxysql02 -u $ansible_user --private-key=$priv_key --become -e "{dbprimary01_ip: '$dbprimary01_ip', dbreplica01_ip: '$dbreplica01_ip', dbreplica02_ip: '$dbreplica02_ip'}" -o > ${OUTPUT_DIR}/setup_proxy_dbservers_px2.txt
+ansible -i ${OUTPUT_DIR}/proxy_hosts.txt -m shell -a 'echo "{{ dbcluster01_ip }} dbnode01.cluster.local" >> /etc/hosts && echo "{{ dbcluster02_ip }} dbnode02.cluster.local" >> /etc/hosts && echo "{{ dbcluster03_ip }} dbnode03.cluster.local" >> /etc/hosts; cat /etc/hosts' proxysql01 -u $ansible_user --private-key=$priv_key --become -e "{dbcluster01_ip: '$dbcluster01_ip', dbcluster02_ip: '$dbcluster02_ip', dbcluster03_ip: '$dbcluster03_ip'}" -o > ${OUTPUT_DIR}/setup_proxy_dbservers_px1.txt
+ansible -i ${OUTPUT_DIR}/proxy_hosts.txt -m shell -a 'echo "{{ dbcluster01_ip }} dbnode01.cluster.local" >> /etc/hosts && echo "{{ dbcluster02_ip }} dbnode02.cluster.local" >> /etc/hosts && echo "{{ dbcluster03_ip }} dbnode03.cluster.local" >> /etc/hosts; cat /etc/hosts' proxysql02 -u $ansible_user --private-key=$priv_key --become -e "{dbcluster01_ip: '$dbcluster01_ip', dbcluster02_ip: '$dbcluster02_ip', dbcluster03_ip: '$dbcluster03_ip'}" -o > ${OUTPUT_DIR}/setup_proxy_dbservers_px2.txt
 
 echo "ProxySQL deployment has been completed successfully!"
