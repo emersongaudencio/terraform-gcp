@@ -94,7 +94,7 @@ sleep 90
 
 # deploy MariaDB to the new VM instances using Ansible
 ansible -i ${OUTPUT_DIR}/db_hosts.txt -m shell -a "curl -sS https://raw.githubusercontent.com/emersongaudencio/general-deployment-scripts/master/automation/install_ansible_mariadb_104.sh | sudo bash" dbservers -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/install_mariadb_dbservers.txt
-
+ansible -i ${OUTPUT_DIR}/db_hosts.txt -m shell -a "sed -ie 's/gtid_strict_mode                        = 0/gtid_strict_mode                        = 1/g' /etc/my.cnf.d/server.cnf" dbservers -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/setup_change_server_parameters.txt
 # wait until databases are fully deployed #
 sleep 60
 
@@ -116,8 +116,8 @@ ansible -i ${OUTPUT_DIR}/db_hosts.txt -m shell -a 'mysql -N -e "RESET SLAVE ALL;
 # setup proxysql user for monitoring purpose #
 ansible -i ${OUTPUT_DIR}/db_hosts.txt -m shell -a "mysql -N -e \"CREATE USER 'maxscalechk'@'%' IDENTIFIED BY 'Test123?dba'; GRANT SELECT ON mysql.* TO 'maxscalechk'@'%'; GRANT SHOW DATABASES ON *.* TO 'maxscalechk'@'%';\"" dbprimary01 -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/setup_replication_proxysql_maxscalechk.txt
 ansible -i ${OUTPUT_DIR}/db_hosts.txt -m shell -a "mysql -N -e \"CREATE USER 'monitor_user'@'%' IDENTIFIED BY 'Test123?dba'; GRANT SUPER, RELOAD, REPLICATION CLIENT, REPLICATION SLAVE on *.* to 'monitor_user'@'%';\"" dbprimary01 -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/setup_replication_proxysql_monitor_user.txt
-# restart replicas #
-ansible -i ${OUTPUT_DIR}/db_hosts.txt -m shell -a "sudo service mariadb restart" dbstandby01 -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/setup_replication_dbstandby01_restart.txt
+# restart db servers #
+ansible -i ${OUTPUT_DIR}/db_hosts.txt -m shell -a "sudo service mariadb restart" dbservers -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/setup_replication_dbservers_restart.txt
 # insert dns entries for DB servers on /etc/hosts
 ansible -i ${OUTPUT_DIR}/db_hosts.txt -m shell -a 'echo "# dbservers" >> /etc/hosts && echo "{{ dbprimary01_ip }} dbprimary01.replication.local" >> /etc/hosts && echo "{{ dbstandby01_ip }} dbstandby01.replication.local" >> /etc/hosts; cat /etc/hosts' dbprimary01 -u $ansible_user --private-key=$priv_key --become -e "{dbprimary01_ip: '$dbprimary01_ip', dbstandby01_ip: '$dbstandby01_ip'}" -o > ${OUTPUT_DIR}/setup_dns_on_dbprimary01.txt
 ansible -i ${OUTPUT_DIR}/db_hosts.txt -m shell -a 'echo "# dbservers" >> /etc/hosts && echo "{{ dbprimary01_ip }} dbprimary01.replication.local" >> /etc/hosts && echo "{{ dbstandby01_ip }} dbstandby01.replication.local" >> /etc/hosts; cat /etc/hosts' dbstandby01 -u $ansible_user --private-key=$priv_key --become -e "{dbprimary01_ip: '$dbprimary01_ip', dbstandby01_ip: '$dbstandby01_ip'}" -o > ${OUTPUT_DIR}/setup_dns_on_dbstandby01.txt
