@@ -13,21 +13,20 @@ ansible_user="gcp-user"
 dbprimary01_ip=$(cat ${OUTPUT_DIR}/db_ips.txt | grep dbprimary01 | awk -F ":" {'print $2'})
 dbstandby01_ip=$(cat ${OUTPUT_DIR}/db_ips.txt | grep dbstandby01 | awk -F ":" {'print $2'})
 
-### deploy proxysql ###
-echo '// A single Compute Engine instance
-resource "google_compute_instance" "maxscale01" {
+### deploy MaxScale ###
+echo 'resource "google_compute_instance" "maxscale01" {
  name         = "maxscale01"
- machine_type = "n1-standard-4"
- zone         = "europe-west2-a"
+ machine_type = var.PROXY_INSTANCE_TYPE
+ zone         = var.DB_SUBNET_ID_AZA
 
  boot_disk {
    initialize_params {
-     image = "centos-7-v20200811"
+     image = var.IMAGE_ID
    }
  }
 
  network_interface {
-   network = "default"
+   network = var.VPC_ID
 
    access_config {
      // Include this section to give the VM an external ip address
@@ -35,24 +34,23 @@ resource "google_compute_instance" "maxscale01" {
  }
 
  metadata = {
-   ssh-keys = "gcp-user:${file("ansible.pub")}"
+   ssh-keys = "${var.SSH_GCP_USER}:${file(var.SSH_PUBLIC_KEY)}"
  }
 }' > maxscale01.tf
 
-echo '// A single Compute Engine instance
-resource "google_compute_instance" "maxscale02" {
+echo 'resource "google_compute_instance" "maxscale02" {
  name         = "maxscale02"
- machine_type = "n1-standard-4"
- zone         = "europe-west2-a"
+ machine_type = var.PROXY_INSTANCE_TYPE
+ zone         = var.DB_SUBNET_ID_AZB
 
  boot_disk {
    initialize_params {
-     image = "centos-7-v20200811"
+     image = var.IMAGE_ID
    }
  }
 
  network_interface {
-   network = "default"
+   network = var.VPC_ID
 
    access_config {
      // Include this section to give the VM an external ip address
@@ -60,7 +58,7 @@ resource "google_compute_instance" "maxscale02" {
  }
 
  metadata = {
-   ssh-keys = "gcp-user:${file("ansible.pub")}"
+   ssh-keys = "${var.SSH_GCP_USER}:${file(var.SSH_PUBLIC_KEY)}"
  }
 }' > maxscale02.tf
 

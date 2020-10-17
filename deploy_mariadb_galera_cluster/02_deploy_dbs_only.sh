@@ -6,20 +6,19 @@ if [ ! -d ${OUTPUT_DIR} ]; then
     chmod 755 ${OUTPUT_DIR}
 fi
 ### deploy databases ###
-echo '// A single Compute Engine instance
-resource "google_compute_instance" "dbcluster01" {
+echo 'resource "google_compute_instance" "dbcluster01" {
  name         = "dbcluster01"
- machine_type = "n1-standard-4"
- zone         = "europe-west2-a"
+ machine_type = var.DB_INSTANCE_TYPE
+ zone         = var.DB_SUBNET_ID_AZA
 
  boot_disk {
    initialize_params {
-     image = "centos-7-v20200811"
+     image = var.IMAGE_ID
    }
  }
 
  network_interface {
-   network = "default"
+   network = var.VPC_ID
 
    access_config {
      // Include this section to give the VM an external ip address
@@ -27,24 +26,23 @@ resource "google_compute_instance" "dbcluster01" {
  }
 
  metadata = {
-   ssh-keys = "gcp-user:${file("ansible.pub")}"
+   ssh-keys = "${var.SSH_GCP_USER}:${file(var.SSH_PUBLIC_KEY)}"
  }
 }' > dbcluster01.tf
 
-echo '// A single Compute Engine instance
-resource "google_compute_instance" "dbcluster02" {
+echo 'resource "google_compute_instance" "dbcluster02" {
  name         = "dbcluster02"
- machine_type = "n1-standard-4"
- zone         = "europe-west2-a"
+ machine_type = var.DB_INSTANCE_TYPE
+ zone         = var.DB_SUBNET_ID_AZB
 
  boot_disk {
    initialize_params {
-     image = "centos-7-v20200811"
+     image = var.IMAGE_ID
    }
  }
 
  network_interface {
-   network = "default"
+   network = var.VPC_ID
 
    access_config {
      // Include this section to give the VM an external ip address
@@ -52,24 +50,23 @@ resource "google_compute_instance" "dbcluster02" {
  }
 
  metadata = {
-   ssh-keys = "gcp-user:${file("ansible.pub")}"
+   ssh-keys = "${var.SSH_GCP_USER}:${file(var.SSH_PUBLIC_KEY)}"
  }
 }' > dbcluster02.tf
 
-echo '// A single Compute Engine instance
-resource "google_compute_instance" "dbcluster03" {
+echo 'resource "google_compute_instance" "dbcluster03" {
  name         = "dbcluster03"
- machine_type = "n1-standard-4"
- zone         = "europe-west2-a"
+ machine_type = var.DB_INSTANCE_TYPE
+ zone         = var.DB_SUBNET_ID_AZC
 
  boot_disk {
    initialize_params {
-     image = "centos-7-v20200811"
+     image = var.IMAGE_ID
    }
  }
 
  network_interface {
-   network = "default"
+   network = var.VPC_ID
 
    access_config {
      // Include this section to give the VM an external ip address
@@ -77,7 +74,7 @@ resource "google_compute_instance" "dbcluster03" {
  }
 
  metadata = {
-   ssh-keys = "gcp-user:${file("ansible.pub")}"
+   ssh-keys = "${var.SSH_GCP_USER}:${file(var.SSH_PUBLIC_KEY)}"
  }
 }' > dbcluster03.tf
 

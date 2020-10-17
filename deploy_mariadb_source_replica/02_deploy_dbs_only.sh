@@ -10,20 +10,19 @@ export ANSIBLE_HOST_KEY_CHECKING=False
 priv_key="/root/repos/ansible_keys/ansible"
 ansible_user="gcp-user"
 ### deploy databases ###
-echo '// A single Compute Engine instance
-resource "google_compute_instance" "dbprimary01" {
+echo 'resource "google_compute_instance" "dbprimary01" {
  name         = "dbprimary01"
- machine_type = "n1-standard-4"
- zone         = "europe-west2-a"
+ machine_type = var.DB_INSTANCE_TYPE
+ zone         = var.DB_SUBNET_ID_AZA
 
  boot_disk {
    initialize_params {
-     image = "centos-7-v20200811"
+     image = var.IMAGE_ID
    }
  }
 
  network_interface {
-   network = "default"
+   network = var.VPC_ID
 
    access_config {
      // Include this section to give the VM an external ip address
@@ -31,24 +30,23 @@ resource "google_compute_instance" "dbprimary01" {
  }
 
  metadata = {
-   ssh-keys = "gcp-user:${file("ansible.pub")}"
+   ssh-keys = "${var.SSH_GCP_USER}:${file(var.SSH_PUBLIC_KEY)}"
  }
 }' > dbprimary01.tf
 
-echo '// A single Compute Engine instance
-resource "google_compute_instance" "dbreplica01" {
+echo 'resource "google_compute_instance" "dbreplica01" {
  name         = "dbreplica01"
- machine_type = "n1-standard-4"
- zone         = "europe-west2-a"
+ machine_type = var.DB_INSTANCE_TYPE
+ zone         = var.DB_SUBNET_ID_AZB
 
  boot_disk {
    initialize_params {
-     image = "centos-7-v20200811"
+     image = var.IMAGE_ID
    }
  }
 
  network_interface {
-   network = "default"
+   network = var.VPC_ID
 
    access_config {
      // Include this section to give the VM an external ip address
@@ -56,24 +54,23 @@ resource "google_compute_instance" "dbreplica01" {
  }
 
  metadata = {
-   ssh-keys = "gcp-user:${file("ansible.pub")}"
+   ssh-keys = "${var.SSH_GCP_USER}:${file(var.SSH_PUBLIC_KEY)}"
  }
 }' > dbreplica01.tf
 
-echo '// A single Compute Engine instance
-resource "google_compute_instance" "dbreplica02" {
+echo 'resource "google_compute_instance" "dbreplica02" {
  name         = "dbreplica02"
- machine_type = "n1-standard-4"
- zone         = "europe-west2-a"
+ machine_type = var.DB_INSTANCE_TYPE
+ zone         = var.DB_SUBNET_ID_AZA
 
  boot_disk {
    initialize_params {
-     image = "centos-7-v20200811"
+     image = var.IMAGE_ID
    }
  }
 
  network_interface {
-   network = "default"
+   network = var.VPC_ID
 
    access_config {
      // Include this section to give the VM an external ip address
@@ -81,7 +78,7 @@ resource "google_compute_instance" "dbreplica02" {
  }
 
  metadata = {
-   ssh-keys = "gcp-user:${file("ansible.pub")}"
+   ssh-keys = "${var.SSH_GCP_USER}:${file(var.SSH_PUBLIC_KEY)}"
  }
 }' > dbreplica02.tf
 
