@@ -91,7 +91,7 @@ echo "dbstandby01 ansible_ssh_host=$dbstandby01_ip_pub" >> ${OUTPUT_DIR}/db_host
 sleep 90
 
 # deploy MariaDB to the new VM instances using Ansible
-ansible -i ${OUTPUT_DIR}/db_hosts.txt -m shell -a "curl -sS https://raw.githubusercontent.com/emersongaudencio/general-deployment-scripts/master/automation/install_ansible_mariadb_104.sh | sudo bash" dbservers -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/install_mariadb_dbservers.txt
+ansible -i ${OUTPUT_DIR}/db_hosts.txt -m shell -a "curl -sS https://raw.githubusercontent.com/emersongaudencio/general-deployment-scripts/master/automation/install_ansible_mariadb_104.sh | bash" dbservers -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/install_mariadb_dbservers.txt
 ansible -i ${OUTPUT_DIR}/db_hosts.txt -m shell -a "sed -ie 's/gtid_strict_mode                        = 0/gtid_strict_mode                        = 1/g' /etc/my.cnf.d/server.cnf" dbservers -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/setup_change_server_parameters.txt
 # wait until databases are fully deployed #
 sleep 60

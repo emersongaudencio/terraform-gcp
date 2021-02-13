@@ -97,7 +97,7 @@ echo "proxysql02 ansible_ssh_host=$proxysql02_ip_pub" >> ${OUTPUT_DIR}/proxy_hos
 sleep 90
 
 # deploy ProxySQL to the new VM instances using Ansible
-ansible -i ${OUTPUT_DIR}/proxy_hosts.txt -m shell -a "curl -sS https://raw.githubusercontent.com/emersongaudencio/general-deployment-scripts/master/automation/install_ansible_proxysql2_galera.sh | sudo bash" proxyservers -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/install_proxysql_proxyservers.txt
+ansible -i ${OUTPUT_DIR}/proxy_hosts.txt -m shell -a "curl -sS https://raw.githubusercontent.com/emersongaudencio/general-deployment-scripts/master/automation/install_ansible_proxysql2_galera.sh | bash" proxyservers -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/install_proxysql_proxyservers.txt
 
 # insert dns entries for ProxySQL on /etc/hosts
 ansible -i ${OUTPUT_DIR}/proxy_hosts.txt -m shell -a 'echo "{{ dbcluster01_ip }} dbnode01.cluster.local" >> /etc/hosts && echo "{{ dbcluster02_ip }} dbnode02.cluster.local" >> /etc/hosts && echo "{{ dbcluster03_ip }} dbnode03.cluster.local" >> /etc/hosts; cat /etc/hosts' proxysql01 -u $ansible_user --private-key=$priv_key --become -e "{dbcluster01_ip: '$dbcluster01_ip', dbcluster02_ip: '$dbcluster02_ip', dbcluster03_ip: '$dbcluster03_ip'}" -o > ${OUTPUT_DIR}/setup_proxy_dbservers_px1.txt

@@ -68,7 +68,7 @@ sleep 90
 ansible -i ${OUTPUT_DIR}/proxymx_hosts.txt -m shell -a 'echo "# dbservers" >> /etc/hosts && echo "{{ dbprimary01_ip }} primary.db.local" >> /etc/hosts; cat /etc/hosts' maxscale01 -u $ansible_user --private-key=$priv_key --become -e "{dbprimary01_ip: '$dbprimary01_ip'}" -o > ${OUTPUT_DIR}/setup_proxy_dbservers_mx1.txt
 
 # deploy MaxScale to the new VM instances using Ansible
-ansible -i ${OUTPUT_DIR}/proxymx_hosts.txt -m shell -a "curl -sS https://raw.githubusercontent.com/emersongaudencio/general-deployment-scripts/master/automation/install_ansible_maxscale_primary_standalone.sh | sudo bash" proxyservers -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/install_proxysql_proxyservers_mx1.txt
+ansible -i ${OUTPUT_DIR}/proxymx_hosts.txt -m shell -a "curl -sS https://raw.githubusercontent.com/emersongaudencio/general-deployment-scripts/master/automation/install_ansible_maxscale_primary_standalone.sh | bash" proxyservers -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/install_proxysql_proxyservers_mx1.txt
 
 # setup proxysql user for monitoring purpose #
 ansible -i ${OUTPUT_DIR}/db_hosts.txt -m shell -a "mysql -N -e \"CREATE USER 'maxscalechk'@'%' IDENTIFIED BY 'Test123?dba'; GRANT SELECT ON mysql.* TO 'maxscalechk'@'%'; GRANT SHOW DATABASES ON *.* TO 'maxscalechk'@'%';\"" dbprimary01 -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/setup_replication_proxysql_maxscalechk.txt

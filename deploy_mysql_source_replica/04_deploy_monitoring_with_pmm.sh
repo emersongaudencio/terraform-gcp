@@ -76,9 +76,9 @@ echo "pmmserver01 ansible_ssh_host=$pmmserver01_ip_pub" >> ${OUTPUT_DIR}/pmmserv
 sleep 90
 
 # Setup disks for PMM to the new VM instances using Ansible
-ansible -i ${OUTPUT_DIR}/pmmserver_hosts.txt -m shell -a "curl -sS https://raw.githubusercontent.com/emersongaudencio/general-deployment-scripts/master/automation/setup_disks_pmm_server_standalone.sh | sudo bash" pmmserver01 -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/setup_disks_pmmserver01.txt
+ansible -i ${OUTPUT_DIR}/pmmserver_hosts.txt -m shell -a "curl -sS https://raw.githubusercontent.com/emersongaudencio/general-deployment-scripts/master/automation/setup_disks_pmm_server_standalone.sh | bash" pmmserver01 -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/setup_disks_pmmserver01.txt
 
 # deploy PMM to the new VM instances using Ansible
-ansible -i ${OUTPUT_DIR}/pmmserver_hosts.txt -m shell -a "curl -sS https://raw.githubusercontent.com/emersongaudencio/general-deployment-scripts/master/automation/install_ansible_pmm_server_standalone.sh | sudo bash" pmmserver01 -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/install_pmmserver01.txt
+ansible -i ${OUTPUT_DIR}/pmmserver_hosts.txt -m shell -a "curl -sS https://raw.githubusercontent.com/emersongaudencio/general-deployment-scripts/master/automation/install_ansible_pmm_server_standalone.sh | bash" pmmserver01 -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/install_pmmserver01.txt
 
 echo "PMM deployment has been completed successfully!"

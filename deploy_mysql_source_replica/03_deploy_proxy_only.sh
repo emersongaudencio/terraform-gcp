@@ -97,7 +97,7 @@ echo "proxysql02 ansible_ssh_host=$proxysql02_ip_pub" >> ${OUTPUT_DIR}/proxy_hos
 sleep 90
 
 # deploy ProxySQL to the new VM instances using Ansible
-ansible -i ${OUTPUT_DIR}/proxy_hosts.txt -m shell -a "curl -sS https://raw.githubusercontent.com/emersongaudencio/general-deployment-scripts/master/automation/install_ansible_proxysql2_replica.sh | sudo bash" proxyservers -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/install_proxysql_proxyservers.txt
+ansible -i ${OUTPUT_DIR}/proxy_hosts.txt -m shell -a "curl -sS https://raw.githubusercontent.com/emersongaudencio/general-deployment-scripts/master/automation/install_ansible_proxysql2_replica.sh | bash" proxyservers -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/install_proxysql_proxyservers.txt
 
 # insert dns entries for ProxySQL on /etc/hosts
 ansible -i ${OUTPUT_DIR}/proxy_hosts.txt -m shell -a 'echo "# dbservers" >> /etc/hosts && echo "{{ dbprimary01_ip }} primary.replication.local" >> /etc/hosts && echo "{{ dbreplica01_ip }} replica1.replication.local" >> /etc/hosts && echo "{{ dbreplica02_ip }} replica2.replication.local" >> /etc/hosts; cat /etc/hosts' proxysql01 -u $ansible_user --private-key=$priv_key --become -e "{dbprimary01_ip: '$dbprimary01_ip', dbreplica01_ip: '$dbreplica01_ip', dbreplica02_ip: '$dbreplica02_ip'}" -o > ${OUTPUT_DIR}/setup_proxy_dbservers_px1.txt
