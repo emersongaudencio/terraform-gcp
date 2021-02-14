@@ -106,7 +106,7 @@ ansible -i ${OUTPUT_DIR}/proxy_hosts.txt -m shell -a 'echo "# dbservers" >> /etc
 # deploy ProxySQL binlogreader on the Database SERVERS
 ansible -i ${OUTPUT_DIR}/db_hosts.txt -m shell -a "yum -y install https://github.com/emersongaudencio/linux_packages/raw/master/RPM/proxysql-mysqlbinlog-1.0-1-centos7.x86_64.rpm; yum install boost-system -y;" dbservers -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/install_binlogreader_dbservers.txt
 
-ansible -i ${OUTPUT_DIR}/db_hosts.txt -m shell -a "mysql -N -e \"CREATE USER 'binlogreader'@'%' IDENTIFIED BY 'Test123dba'; GRANT SUPER, REPLICATION CLIENT, REPLICATION SLAVE ON *.* TO 'binlogreader'@'%';\"" dbprimary01 -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/setup_binlogreader_dbservers_user.txt
+ansible -i ${OUTPUT_DIR}/db_hosts.txt -m shell -a "mysql -N -e \"CREATE USER 'binlogreader'@'%' IDENTIFIED BY 'Test123dba'; GRANT PROCESS, REPLICATION CLIENT, REPLICATION SLAVE ON *.* TO 'binlogreader'@'%';\"" dbprimary01 -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/setup_binlogreader_dbservers_user.txt
 
 ansible -i ${OUTPUT_DIR}/db_hosts.txt -m shell -a "proxysql_binlog_reader -h 127.0.0.1 -u binlogreader -pTest123dba -P 3306 -l 3307 -L /tmp/binlogreader.log" dbservers -u $ansible_user --private-key=$priv_key --become -o > ${OUTPUT_DIR}/startup_binlogreader_dbservers.txt
 
